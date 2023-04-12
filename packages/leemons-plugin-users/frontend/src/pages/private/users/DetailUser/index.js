@@ -96,6 +96,9 @@ function DetailUser({ session }) {
       store.canUpdate =
         permissions[0].actionNames.includes('update') ||
         permissions[0].actionNames.includes('admin');
+      store.canDelete =
+        permissions[0].actionNames.includes('delete') ||
+        permissions[0].actionNames.includes('admin');
       render();
     }
   }
@@ -162,6 +165,10 @@ function DetailUser({ session }) {
     if (store.profiles[0]) selectProfile(store.profiles[0].value);
     store.isEditMode = false;
     render();
+  }
+
+  async function deactivateUserAgent() {
+    console.log(store.userAgent);
   }
 
   async function tryToSave() {
@@ -251,6 +258,11 @@ function DetailUser({ session }) {
                 data={store.profiles}
               />
             </ContextContainer>
+            {store.canDelete ? (
+              <Button onClick={deactivateUserAgent} sx={() => ({ justifySelf: 'end' })}>
+                {t('deactivate')}
+              </Button>
+            ) : null}
             {store.canUpdate ? (
               <>
                 {store.isEditMode ? (

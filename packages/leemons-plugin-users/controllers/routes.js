@@ -247,6 +247,28 @@ module.exports = [
     authenticated: true,
   },
   {
+    path: '/user-agent/:id/deactivate',
+    method: 'DELETE',
+    handler: 'users.deactivateUserAgent',
+    authenticated: true,
+    allowedPermissions: {
+      'plugins.users.users': {
+        actions: ['delete', 'admin'],
+      },
+    },
+  },
+  {
+    path: '/user-agent/:id/activate',
+    method: 'DELETE',
+    handler: 'users.activateUserAgent',
+    authenticated: true,
+    allowedPermissions: {
+      'plugins.users.users': {
+        actions: ['create', 'update', 'delete', 'admin'],
+      },
+    },
+  },
+  {
     path: '/user-agent/:id',
     method: 'DELETE',
     handler: 'users.deleteUserAgent',

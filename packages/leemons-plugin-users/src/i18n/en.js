@@ -284,6 +284,8 @@ module.exports = {
     save: 'Save',
     cancel: 'Cancel',
     saveSuccess: 'Saved successfully',
+    deactivate: 'Deactivate',
+    activate: 'Activate',
   },
   userDetailModal: {
     male: 'Male',

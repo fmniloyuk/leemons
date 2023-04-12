@@ -284,6 +284,8 @@ module.exports = {
     save: 'Guardar',
     cancel: 'Cancelar',
     saveSuccess: 'Datos guardados con éxito',
+    deactivate: 'Desactivar',
+    activate: 'Activar',
   },
   userDetailModal: {
     male: 'Hombre',

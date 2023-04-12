@@ -518,6 +518,12 @@ async function sendWelcomeEmailToUser(ctx) {
   }
 }
 
+async function deactivateUserAgent(ctx) {
+  await userAgentsService.deactivateUserAgent(ctx.params.id);
+  ctx.status = 200;
+  ctx.body = { status: 200 };
+}
+
 module.exports = {
   list,
   reset,
@@ -545,6 +551,7 @@ module.exports = {
   removeRememberLogin,
   centerProfileToken,
   updateUserAvatar,
+  deactivateUserAgent,
   deleteUserAgent,
   canRegisterPassword,
   sendWelcomeEmailToUser,
