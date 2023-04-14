@@ -76,7 +76,7 @@ function getAllTeachers(classes, classesData) {
 }
 
 async function createSubjectsRooms(
-  { assignableInstanceId, parentKey, classes, teachers },
+  { assignableInstanceId, instance, parentKey, classes, teachers },
   { transacting } = {}
 ) {
   const comunicaServices = leemons.getPlugin('comunica').services;
@@ -98,6 +98,14 @@ async function createSubjectsRooms(
         program: classes[0].program,
         type: leemons.plugin.prefixPN('assignation.subject'),
         adminUserAgents: _.compact(_.uniq(teachers)),
+        metadata: {
+          headerIconIsUrl: false,
+          headerName: instance.assignable.asset.name,
+          headerSubName: classe.subject.name,
+          headerImage: instance.assignable.asset.id,
+          headerIcon: classe.subject.icon?.id,
+          headerBgColor: classe.color,
+        },
         transacting,
       });
     }
@@ -121,7 +129,7 @@ async function createSubjectsRooms(
 }
 
 async function createGroupRoom(
-  { assignableInstanceId, parentKey, classes, teachers, users },
+  { assignableInstanceId, instance, parentKey, classes, teachers, users },
   { transacting } = {}
 ) {
   const comunicaServices = leemons.getPlugin('comunica').services;
@@ -144,6 +152,13 @@ async function createGroupRoom(
       type: leemons.plugin.prefixPN('assignation.group'),
       metadata: {
         iconIsUrl: classes.length > 1,
+        headerIconIsUrl: classes.length > 1,
+        headerName: instance.assignable.asset.name,
+        headerSubName: classes.length > 1 ? 'multisubjects' : classes[0].subject.name,
+        headerImage: instance.assignable.asset.id,
+        headerIcon:
+          classes.length > 1 ? '/public/assets/svgs/module-three.svg' : classes[0].subject.icon?.id,
+        headerBgColor: classes.length > 1 ? '#67728E' : classes[0].color,
       },
       userAgents,
       adminUserAgents: teachersUserAgents,
@@ -162,7 +177,7 @@ async function createGroupRoom(
 }
 
 async function addUserSubjectRoom(
-  { parentKey, classe, assignation, user, teachers },
+  { parentKey, instance, classe, assignation, user, teachers },
   { transacting }
 ) {
   const comunicaServices = leemons.getPlugin('comunica').services;
@@ -182,10 +197,19 @@ async function addUserSubjectRoom(
       type: leemons.plugin.prefixPN('assignation.user'),
       userAgents: user,
       adminUserAgents: _.compact(_.uniq(teachers)),
+      metadata: {
+        headerIconIsUrl: false,
+        headerName: instance.assignable.asset.name,
+        headerImage: instance.assignable.asset.id,
+        headerIcon: classe.subject.icon?.id,
+        headerBgColor: classe.color,
+      },
       transacting,
     }
   );
 }
+
+const rolesWithChat = ['tests', 'task'];
 
 module.exports = async function createAssignation(
   assignableInstanceId,
@@ -241,37 +265,40 @@ module.exports = async function createAssignation(
         // instance.dates.start
 
         // TODO @MIGUEL
-        console.log(1);
-        const teachers = getAllTeachers(_classes, classesData);
-        const instanceRoom = await createInstanceRoom(
-          {
+        let subjectRooms = null;
+        let instanceRoom = null;
+        if (rolesWithChat.includes(instance.assignable.role)) {
+          const teachers = getAllTeachers(_classes, classesData);
+          instanceRoom = await createInstanceRoom(
+            {
+              assignableInstanceId,
+              instance,
+              classes: _classes,
+              teachers,
+              users,
+            },
+            { transacting }
+          );
+
+          // TODO @MIGUEL
+          await createGroupRoom({
             assignableInstanceId,
             instance,
             classes: _classes,
+            parentKey: instanceRoom.key,
             teachers,
             users,
-          },
-          { transacting }
-        );
+          });
 
-        console.log(2);
-        // TODO @MIGUEL
-        await createGroupRoom({
-          assignableInstanceId,
-          classes: _classes,
-          parentKey: instanceRoom.key,
-          teachers,
-          users,
-        });
-
-        console.log(3);
-        // TODO @MIGUEL
-        const subjectRooms = await createSubjectsRooms({
-          assignableInstanceId,
-          parentKey: instanceRoom.key,
-          classes: _classes,
-          teachers,
-        });
+          // TODO @MIGUEL
+          subjectRooms = await createSubjectsRooms({
+            assignableInstanceId,
+            instance,
+            parentKey: instanceRoom.key,
+            classes: _classes,
+            teachers,
+          });
+        }
 
         // EN: Create the assignation
         // ES: Crea la asignación
@@ -316,19 +343,21 @@ module.exports = async function createAssignation(
               });
 
               // TODO @MIGUEL
-              console.log(4);
-              roomsPromises.push(
-                addUserSubjectRoom(
-                  {
-                    parentKey: `${subjectRooms[classe.subject.id].key}|${instanceRoom.key}`,
-                    classe,
-                    assignation,
-                    user,
-                    teachers: _teachers,
-                  },
-                  { transacting }
-                )
-              );
+              if (rolesWithChat.includes(instance.assignable.role)) {
+                roomsPromises.push(
+                  addUserSubjectRoom(
+                    {
+                      parentKey: `${subjectRooms[classe.subject.id].key}|${instanceRoom.key}`,
+                      classe,
+                      instance,
+                      assignation,
+                      user,
+                      teachers: _teachers,
+                    },
+                    { transacting }
+                  )
+                );
+              }
             });
 
             await Promise.all(roomsPromises);

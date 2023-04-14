@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const aws = require('aws-sdk');
+const awsIotDeviceSdk = require('aws-iot-device-sdk');
 const cron = require('node-cron');
 const slugify = require('slugify');
 const squirrelly = require('squirrelly');
@@ -40,6 +41,7 @@ const numberToEncodedLetter = require('./numberToEncodedLetter');
 const sqlDatetime = require('./sqlDatetime');
 const metascraper = require('./metascraper');
 const getDiff = require('./getDiff');
+const getPermissionsForRoutes = require('./getPermissionsForRoutes');
 
 squirrelly.helpers.define('printWithOutErrors', ({ params }) => {
   const it = params[0];
@@ -62,6 +64,7 @@ module.exports = {
   parseFilters,
   getStackTrace,
   getAvailablePort,
+  getPermissionsForRoutes,
   nodemailer,
   LeemonsValidator,
   HttpError,
@@ -78,6 +81,7 @@ module.exports = {
   slugify,
   withTransaction,
   squirrelly,
+  awsIotDeviceSdk,
   getObjectArrayKeys,
   numberToEncodedLetter,
   timeoutPromise: (time) =>

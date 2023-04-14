@@ -1,8 +1,10 @@
 import React from 'react';
 import useCurriculum from '@curriculum/request/hooks/queries/useCurriculum';
 import useListCurriculumsByProgram from '@curriculum/request/hooks/queries/useListCurriculumsByProgram';
-import { cloneDeep, intersection, set, uniqBy } from 'lodash';
-import { useStore } from '@common';
+import { cloneDeep, get, intersection, isArray, last, set, uniqBy } from 'lodash';
+import { unflatten, useStore } from '@common';
+import prefixPN from '@assignables/helpers/prefixPN';
+import useTranslateLoader from '@multilanguage/useTranslateLoader';
 
 function parseCurriculumValue(id) {
   return { ...Object.fromEntries(id?.split('|').map((pair) => pair.split('.'))), original: id };
@@ -15,10 +17,10 @@ function flatCurriculumNodes(curriculumNodes) {
         id: node.id,
         nodeLevel: node.nodeLevel,
         nodeLevelPropertyByPropertyId: Object.fromEntries(
-          Object.entries(node.formValues || {}).map(([nodeLevelProperty, { id }]) => [
-            id,
-            nodeLevelProperty,
-          ])
+          Object.entries(node.formValues || {}).flatMap(([nodeLevelProperty, props]) => {
+            const properties = isArray(props) ? props : [props];
+            return properties.map((property) => [property.id, nodeLevelProperty]);
+          })
         ),
       };
 
@@ -67,12 +69,32 @@ export function useSelectedCurriculumValues({ assignable }) {
   return selectedCurriculumValues;
 }
 
+export function useCustomObjectivesLocalizations() {
+  const key = prefixPN('customObjectives');
+  const [, translations] = useTranslateLoader(key);
+
+  return React.useMemo(() => {
+    if (translations && translations.items) {
+      const res = unflatten(translations.items);
+
+      return get(res, key, '');
+    }
+
+    return '';
+  });
+}
+
 export function useSelectedCurriculumProperties({
   curriculum,
   curriculumNodes,
   nodeLevels,
   selectedCurriculumValues,
 }) {
+  const customObjectiveLocalization = useCustomObjectivesLocalizations();
+  const customObjectives = React.useMemo(
+    () => !!selectedCurriculumValues?.some((value) => value.hasCustomObjectives),
+    [selectedCurriculumValues]
+  );
   const flattenSelectedValues = React.useMemo(
     () => selectedCurriculumValues?.flatMap((value) => value.values),
     [selectedCurriculumValues]
@@ -104,6 +126,19 @@ export function useSelectedCurriculumProperties({
       'id'
     );
   }, [curriculumNodes, flattenSelectedValues]);
+
+  React.useEffect(() => {
+    if (customObjectives) {
+      if (!usedProperties?.length || last(usedProperties)?.id !== 'custom') {
+        usedProperties.push({
+          id: 'custom',
+          name: customObjectiveLocalization,
+        });
+      } else {
+        usedProperties[usedProperties.length - 1].name = customObjectiveLocalization;
+      }
+    }
+  }, [usedProperties, customObjectives, customObjectiveLocalization]);
 
   return usedProperties;
 }
