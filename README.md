@@ -1,9 +1,4 @@
 # Leemons
-
-[![GitHub contributors](https://img.shields.io/github/contributors/leemonade/leemons)](https://github.com/leemonade/leemons/graphs/contributors)
-[![CircleCI build](https://img.shields.io/circleci/build/github/leemonade/leemons/main)](https://app.circleci.com/pipelines/github/leemonade/leemons)
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fleemonade%2Fleemons.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fleemonade%2Fleemons?ref=badge_shield)
-
 The powerful flexible friendly Learning Experience Platform you’re waiting for.
 
 - **Keep control over your data**. With Leemons, you know where your data is stored, and you keep full control at all times.
@@ -56,13 +51,65 @@ For general help using Leemons, please refer to - the official Leemons documenta
 
 - [GitHub](https://github.com/leemonade/leemons) (Bug reports, Contributions)
 
-## Star History
+### How to run using pm2
 
-[![Star History Chart](https://api.star-history.com/svg?repos=leemonade/leemons&type=Date)](https://star-history.com/#leemonade/leemons&Date)
+```
+pm2 start yarn --name leemons-backend -- dev
+pm2 start yarn --name leemons-frontend -- front
+```
 
-## License
+### How to migrate the database to a new server?
 
-MIT
+1. Import the database dump of the old server
 
+2. Update the paths of the plugins and providers table
 
-[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fleemonade%2Fleemons.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fleemonade%2Fleemons?ref=badge_large)
+```
+UPDATE `models::plugins` SET path = REPLACE(path, 'OLD LEEMONS PATH', 'NEW LEEMONS PATH') WHERE path LIKE 'OLD LEEMONS PATH/%%';
+ UPDATE `models::providers` SET path = REPLACE(path, 'OLD LEEMONS PATH', 'NEW LEEMONS PATH') WHERE path LIKE 'NEW LEEMONS PATH/%%';
+```
+
+3. Update the server IP address
+```
+UPDATE `leemons`.`plugins_users::config` SET `value` = 'NEW URL' WHERE `id` = 'id';
+```
+
+### How to activate user accounts manually?
+
+1. Connect to your database
+
+2. Paste this queries
+
+```
+use `leemons`;
+SET @email = "example@leemons.io";
+
+SELECT value FROM `plugins_users::config` WHERE `key` = "jwt-private-key";
+
+SELECT code, user FROM `plugins_users::user-register-password` WHERE user = (
+    SELECT id FROM `plugins_users::users` WHERE email = @email
+);
+```
+
+3. Replace all in the first line leemons by your database
+
+4. Replace the email in the second line by your user email
+
+5. Replace the given info in the following object:
+
+```
+{
+  "id": "USER",
+  "code": "CODE,
+  "iat": 1668679279,       // From epoch converter
+  "exp": 1669679279        // I've just changed a number and verify the new date is greater enough.
+}
+```
+
+6. entre jwt.io and replace the payload by that object and the secret key by the jwt-private-key, and copy the jwt
+
+7. Create the url replacing the host by your domain and YOUR_JWT by the copied JWT
+
+```
+HOST/users/register-password?token=YOUR_JWT
+```

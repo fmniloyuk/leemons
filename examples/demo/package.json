@@ -14,6 +14,7 @@
   },
   "leemons": {},
   "dependencies": {
+    "@tiptap/pm": "^2.0.3",
     "leemons": "0.0.1",
     "leemons-connector-bookshelf": "0.0.1",
     "leemons-plugin-academic-calendar": "0.0.1",
@@ -51,6 +52,7 @@
     "leemons-provider-leebrary-tasks": "0.0.1",
     "leemons-provider-leebrary-tests": "0.0.1",
     "leemons-react": "0.0.1",
-    "mysql2": "^2.3.3"
+    "mysql2": "^2.3.3",
+    "prosemirror-state": "^1.4.2"
   }
 }
