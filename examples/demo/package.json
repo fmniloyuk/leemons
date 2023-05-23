@@ -54,6 +54,7 @@
     "leemons-react": "0.0.1",
     "mysql2": "^2.3.3",
     "nodemailer": "^6.9.2",
-    "prosemirror-state": "^1.4.2"
+    "prosemirror-state": "^1.4.2",
+    "socket-io": "^1.0.0"
   }
 }

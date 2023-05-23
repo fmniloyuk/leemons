@@ -1,4 +1,5 @@
 # Leemons
+
 The powerful flexible friendly Learning Experience Platform you’re waiting for.
 
 - **Keep control over your data**. With Leemons, you know where your data is stored, and you keep full control at all times.
@@ -58,6 +59,13 @@ pm2 start yarn --name leemons-backend -- dev
 pm2 start yarn --name leemons-frontend -- front
 ```
 
+Or run the following commands to start without building the frontend:
+
+```
+pm2 start yarn --name leemons-backend -- start
+pm2 start yarn --name leemons-frontend -- front:preview
+```
+
 ### How to migrate the database to a new server?
 
 1. Import the database dump of the old server
@@ -70,6 +78,7 @@ UPDATE `models::plugins` SET path = REPLACE(path, 'OLD LEEMONS PATH', 'NEW LEEMO
 ```
 
 3. Update the server IP address
+
 ```
 UPDATE `leemons`.`plugins_users::config` SET `value` = 'NEW URL' WHERE `id` = 'id';
 ```
