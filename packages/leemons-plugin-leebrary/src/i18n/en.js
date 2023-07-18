@@ -238,6 +238,7 @@ module.exports = {
       commentor: 'Commentor',
       editor: 'Editor',
       owner: 'Owner',
+      assigner: 'Assigner',
       public: 'Public',
     },
   },
@@ -314,5 +315,15 @@ module.exports = {
     setup: {
       chooseProvider: 'Choose provider',
     },
+  },
+  uploadFileModal: {
+    title: 'Uploading file',
+    fileOf: 'Uploading file {currentFile} of {totalFiles} - {currentFilePercentageCompleted}%',
+    init: 'Starting file upload',
+    unzip: 'Preparing zip for upload',
+  },
+  assetsList: {
+    published: 'Published',
+    draft: 'Drafts',
   },
 };
