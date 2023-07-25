@@ -66,6 +66,12 @@ pm2 start yarn --name leemons-backend -- start
 pm2 start yarn --name leemons-frontend -- front:preview
 ```
 
+```
+pm2 start npm --name leemons-backend -- start
+sudo nohup yarn front &
+sudo watch tail nohup.out 
+```
+
 ### How to migrate the database to a new server?
 
 1. Import the database dump of the old server
