@@ -66,12 +66,21 @@ pm2 start yarn --name leemons-backend -- start
 pm2 start yarn --name leemons-frontend -- front:preview
 ```
 
+Or you can also use npm
 ```
 pm2 start npm --name leemons-backend -- start
-sudo lsof -i :3000
-sudo kill <pid>
+```
+
+### How to run using nohup
+```
 sudo nohup yarn front &
 sudo watch tail nohup.out 
+```
+
+Kill the pid
+```
+sudo lsof -i :3000
+sudo kill <pid>
 ```
 
 ### How to migrate the database to a new server?
