@@ -68,6 +68,8 @@ pm2 start yarn --name leemons-frontend -- front:preview
 
 ```
 pm2 start npm --name leemons-backend -- start
+sudo lsof -i :3000
+sudo kill <pid>
 sudo nohup yarn front &
 sudo watch tail nohup.out 
 ```
