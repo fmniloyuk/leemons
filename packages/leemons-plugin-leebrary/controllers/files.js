@@ -1,4 +1,4 @@
-const { isEmpty } = require('lodash');
+const { isEmpty, isString } = require('lodash');
 const fs = require('fs/promises');
 const fileService = require('../src/services/files');
 const { getByFile } = require('../src/services/assets/files/getByFile');
@@ -48,7 +48,16 @@ async function getFileContent(ctx) {
     path: ctx.params[0],
     start: bytesStart,
     end: bytesEnd,
+    forceStream: !!ctx.query.forceStream,
   });
+
+  if (isString(readStream) && readStream.indexOf('http') === 0) {
+    // Redirect to external URL
+    ctx.status = 307;
+    ctx.set('Cache-Control', 'max-age=300');
+    ctx.redirect(readStream);
+    return;
+  }
 
   const mediaType = contentType.split('/')[0];
 
@@ -72,6 +81,7 @@ async function getFileContent(ctx) {
 
     if (fileSize > 0) {
       ctx.set('Content-Length', fileSize);
+      // TODO Check if Accept-Ranges header is needed and streaming implications
       ctx.set('Accept-Ranges', 'bytes');
     }
 
@@ -88,11 +98,22 @@ async function getFileContent(ctx) {
   }
 }
 
+async function getFolderContent(ctx) {
+  ctx.query.forceStream = true;
+  return getFileContent(ctx);
+}
+
 /**
  *
  */
 async function getPublicFileContent(ctx) {
   ctx.query.onlyPublic = true;
+  return getFileContent(ctx);
+}
+
+async function getPublicFolderContent(ctx) {
+  ctx.query.onlyPublic = true;
+  ctx.query.forceStream = true;
   return getFileContent(ctx);
 }
 
@@ -123,7 +144,17 @@ async function getCoverFileContent(ctx) {
     );
   }
   if (asset.cover) {
-    const { readStream, fileName, contentType } = await fileService.dataForReturnFile(asset.cover);
+    const { readStream, fileName, contentType } = await fileService.dataForReturnFile(asset.cover, {
+      forceStream: false,
+    });
+
+    if (isString(readStream) && readStream.indexOf('http') === 0) {
+      // Redirect to external URL
+      ctx.status = 307;
+      ctx.set('Cache-Control', 'max-age=300');
+      ctx.redirect(readStream);
+      return;
+    }
 
     const mediaType = contentType.split('/')[0];
 
@@ -168,7 +199,9 @@ async function finishMultipartFunc(ctx) {
 
 module.exports = {
   file: getFileContent,
+  folder: getFolderContent,
   publicFile: getPublicFileContent,
+  publicFolder: getPublicFolderContent,
   cover: getCoverFileContent,
   newMultipart: newMultipartFunc,
   abortMultipart: abortMultipartFunc,

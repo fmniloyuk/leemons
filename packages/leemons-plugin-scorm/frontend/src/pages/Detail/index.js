@@ -157,7 +157,7 @@ export default function Detail() {
 
   async function onlyPublish() {
     await saveAsPublish();
-    history.push('/private/scorm');
+    history.push('/private/leebrary/assignables.scorm/list?activeTab=published');
   }
 
   async function publishAndAssign() {
@@ -340,7 +340,7 @@ export default function Detail() {
                       />
                     </Box>
                     <Box>
-                      <Controller
+                      {/* <Controller
                         control={form.control}
                         name="gradable"
                         shouldUnregister
@@ -382,7 +382,7 @@ export default function Detail() {
                             )}
                           </>
                         )}
-                      />
+                      /> */}
                     </Box>
                   </ContextContainer>
                 </AssetFormInput>
