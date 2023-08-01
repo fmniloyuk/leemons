@@ -138,7 +138,7 @@ export function useStudentState({ assignation = {} }) {
 }
 
 function PreviewActions({ activity, localizations }) {
-  const { id, roleDetails } = activity?.assignable;
+  const { id, roleDetails } = activity?.assignable ?? {};
 
   const url = roleDetails.previewUrl?.replace(':id', id);
 
@@ -251,7 +251,7 @@ export function DashboardCard({ activity, assignation, isBlocked, localizations,
   const { classes } = useDashboardCardStyles();
 
   const durationSeconds = useDurationInSeconds(activity);
-  const evaluationType = evaluationTypeLocalizations?.[useEvaluationType(activity)];
+  const evaluationType = (evaluationTypeLocalizations ?? {})[useEvaluationType(activity)];
 
   return (
     <Box className={classes.root}>
